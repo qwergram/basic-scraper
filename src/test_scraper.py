@@ -51,4 +51,6 @@ def test_update_seattle(seattle_request):
 
 
 def test_send_request_dummy():
-    response = send_request(, {})
+    response = send_request(SCRAPE_VARS['DOMAIN'] + SCRAPE_VARS['PATH'], {})
+    import pdb; pdb.set_trace()
+    assert 1 == 1
