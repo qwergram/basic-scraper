@@ -43,11 +43,7 @@ def get_inspection_page(**kwargs):
 
     """
     endpoint = SCRAPE_VARS['DOMAIN'] + SCRAPE_VARS['PATH']
-    for key, val in kwargs.items():
-        if key in SCRAPE_VARS['PARAMS']:
-            params[key] = val
-        else:
-            raise KeyError("Illegal key '{}':'{}' passed in".format(key, val))
+    params = update_vals(**kwargs)
     resp = requests.get(endpoint, params=params)
     resp.raise_for_status()
     return resp.content, resp.encoding
