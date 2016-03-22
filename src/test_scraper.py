@@ -1,4 +1,9 @@
-from scraper import update_vals, SCRAPE_VARS, get_inspection_page
+from scraper import (
+    update_vals,
+    SCRAPE_VARS,
+    get_inspection_page,
+    send_request,
+)
 import pytest
 
 
@@ -11,7 +16,7 @@ def empty_request():
 @pytest.fixture(scope='function')
 def seattle_request():
     """Create a request for every seattle restraunt."""
-    return {"City": "Seattle"}
+    return {"City": "Seattle", "Inspection_End": "3/22/2016", "Inspection_Start": "3/1/2016"}
 
 
 def test_update_null(empty_request):
@@ -43,3 +48,7 @@ def test_update_seattle(seattle_request):
         'Sort': 'H'
     }
     assert result == expected
+
+
+def test_send_request_dummy():
+    response = send_request(, {})
