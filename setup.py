@@ -23,7 +23,7 @@ test_requires = [
 
 setup(name='basic_scraper',
       version='0.0',
-      description='An application that scrapes the king county website for health information',
+      description='An application that scrapes the king county website',
       classifiers=[
         "Programming Language :: Python",
         ],
