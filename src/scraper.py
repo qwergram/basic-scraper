@@ -38,8 +38,11 @@ def update_vals(**kwargs):
 
 
 def send_request(endpoint, params=SCRAPE_VARS['PARAMS']):
-    response = requests.get(endpoint, params)
-    response.raise_for_status()
+    try:
+        response = requests.get(endpoint, params=params, timeout=1)
+        response.raise_for_status()
+    except requests.exceptions.ReadTimeout:
+        raise ValueError("Invalid URL")
     return response.content, response.encoding
 
 
