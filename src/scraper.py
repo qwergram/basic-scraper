@@ -26,13 +26,23 @@ SCRAPE_VARS = {
 }
 
 
+def update_vals(**kwargs):
+    """Take all the kwargs and compile them into a proper request."""
+    params = SCRAPE_VARS['PARAMS'].copy()
+    for key, val in kwargs.items():
+        if key in SCRAPE_VARS['PARAMS']:
+            params[key] = val
+        else:
+            raise KeyError("Illegal key '{}':'{}' passed in".format(key, val))
+    return params
+
+
 def get_inspection_page(**kwargs):
     """Create a get request to the API endpoint.
 
 
     """
     endpoint = SCRAPE_VARS['DOMAIN'] + SCRAPE_VARS['PATH']
-    params = SCRAPE_VARS['PARAMS'].copy()
     for key, val in kwargs.items():
         if key in SCRAPE_VARS['PARAMS']:
             params[key] = val
