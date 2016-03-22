@@ -27,6 +27,7 @@ bin/
 lib64
 pyvenv.cfg
 share/
+include/
 .DS_Store
 .Python
 secrets.sh
