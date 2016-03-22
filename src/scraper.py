@@ -36,6 +36,14 @@ def update_vals(**kwargs):
             raise KeyError("Illegal key '{}':'{}' passed in".format(key, val))
     return params
 
+def format_get_request(params):
+    if not params:
+        return ""
+    request = "?{}"
+    for key, value in params.items():
+        request.format("{}={}&{}".format(key, value, "{}"))
+    return request[:-1]
+
 
 def send_request(endpoint, params=SCRAPE_VARS['PARAMS']):
     try:
