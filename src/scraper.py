@@ -48,7 +48,7 @@ def format_get_request(params):
 
 def send_request(endpoint, params=SCRAPE_VARS['PARAMS']):
     try:
-        response = requests.get(endpoint, params=params, timeout=1)
+        response = requests.get(endpoint, params=params, timeout=5)
         response.raise_for_status()
     except requests.exceptions.ReadTimeout:
         raise ValueError("Invalid URL")
