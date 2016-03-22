@@ -37,6 +37,12 @@ def update_vals(**kwargs):
     return params
 
 
+def send_request(endpoint, params=SCRAPE_VARS['PARAMS']):
+    response = requests.get(endpoint, params)
+    response.raise_for_status()
+    return response.content, response.encoding
+
+
 def get_inspection_page(**kwargs):
     """Create a get request to the API endpoint.
 
@@ -44,14 +50,9 @@ def get_inspection_page(**kwargs):
     """
     endpoint = SCRAPE_VARS['DOMAIN'] + SCRAPE_VARS['PATH']
     params = update_vals(**kwargs)
-    resp = requests.get(endpoint, params=params)
-    resp.raise_for_status()
-    return resp.content, resp.encoding
+    content, encoding = send_request(endpoint, params)
+    return content, encoding
 
-
-def main():
-    response = get_inspection_page()
-    return response
 
 if __name__ == "__main__":
-    main()
+    get_inspection_page()
