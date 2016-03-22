@@ -36,12 +36,13 @@ def update_vals(**kwargs):
             raise KeyError("Illegal key '{}':'{}' passed in".format(key, val))
     return params
 
+
 def format_get_request(params):
     if not params:
         return ""
-    request = "?{}"
+    request = "?"
     for key, value in params.items():
-        request.format("{}={}&{}".format(key, value, "{}"))
+        request += "{}={}&".format(key, value)
     return request[:-1]
 
 
