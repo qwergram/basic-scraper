@@ -1,17 +1,7 @@
 from setuptools import setup
 
 requires = [
-    'pyramid',
-    'pyramid_jinja2',
-    'pyramid_debugtoolbar',
-    'pyramid_tm',
-    'sqlalchemy',
-    'transaction',
-    'zope.sqlalchemy',
-    'waitress',
-    'psycopg2',
-    'wtforms',
-    'markdown'
+    'requests',
     ]
 
 test_requires = [
