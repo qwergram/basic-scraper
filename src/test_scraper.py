@@ -5,6 +5,7 @@ from scraper import (
     format_get_request,
     send_request,
     parse_broken_html,
+    save_html,
 )
 import pytest
 
@@ -84,6 +85,13 @@ def test_get_inspection_page(seattle_request):
     get_request = format_get_request(params)
     url = SCRAPE_VARS['DOMAIN'] + SCRAPE_VARS['PATH'] + get_request
     response = send_request(url)
-    # parsed = parse_broken_html(response.text)
-    # import pdb; pdb.set_trace()
-    assert get_inspection_page(params) == response.text, response.encoding
+    test_text, test_encoding = get_inspection_page(**seattle_request)
+    assert test_text[:200].decode('utf-8') == response.text[:200], response.encoding  # NOQA
+
+
+def test_save_html(seattle_request):
+    import io
+    save_html("test")
+    with io.open("inspection_page.html") as test:
+        test = test.read()
+    assert test == "test"

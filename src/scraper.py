@@ -63,6 +63,8 @@ def parse_broken_html(raw_text, encoding="utf-8"):
 
 
 def save_html(html):
+    if isinstance(html, bytes):
+        html = html.decode()
     with io.open("inspection_page.html", 'w') as save:
         save.write(html)
 
@@ -71,11 +73,17 @@ def get_inspection_page(**kwargs):
     """Create a get request to the API endpoint."""
     endpoint = SCRAPE_VARS['DOMAIN'] + SCRAPE_VARS['PATH']
     params = update_vals(**kwargs)
-    response = send_request(endpoint, params)
+    get = format_get_request(params)
+    response = send_request(endpoint + get)
     save_html(response.content)
     return response.content, response.encoding
 
 
 if __name__ == "__main__":
-    content, encoding = get_inspection_page()
+    seattle = {
+               "City": "Seattle",
+               "Inspection_End": "3/22/2016",
+               "Inspection_Start": "3/1/2016"
+              }
+    content, encoding = get_inspection_page(**seattle)
     parse_broken_html(content, encoding)
