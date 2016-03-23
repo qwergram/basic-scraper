@@ -1,6 +1,6 @@
 # coding=utf-8
 """Scrape foodsafety data from kingcounty."""
-import requests
+import requests, html5lib
 
 SCRAPE_VARS = {
     "DOMAIN": 'http://info.kingcounty.gov/',
@@ -46,14 +46,17 @@ def format_get_request(params):
     return request[:-1]
 
 
-def send_request(endpoint, params=SCRAPE_VARS['PARAMS']):
+def send_request(endpoint):
     try:
-        response = requests.get(endpoint, params=params, timeout=5)
+        response = requests.get(endpoint, timeout=10)
         response.raise_for_status()
     except requests.exceptions.ReadTimeout:
         raise ValueError("Invalid URL")
-    return response.content, response.encoding
+    return response
 
+
+def parse_broken_html(raw_text):
+    return html5lib.parse(raw_text)
 
 def get_inspection_page(**kwargs):
     """Create a get request to the API endpoint.
@@ -62,8 +65,8 @@ def get_inspection_page(**kwargs):
     """
     endpoint = SCRAPE_VARS['DOMAIN'] + SCRAPE_VARS['PATH']
     params = update_vals(**kwargs)
-    content, encoding = send_request(endpoint, params)
-    return content, encoding
+    response = send_request(endpoint, params)
+    return response.content, response.encoding
 
 
 if __name__ == "__main__":
