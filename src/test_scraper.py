@@ -4,6 +4,7 @@ from scraper import (
     get_inspection_page,
     format_get_request,
     send_request,
+    parse_broken_html,
 )
 import pytest
 
@@ -74,7 +75,15 @@ def test_send_request_dummy(seattle_request):
     params = update_vals(**seattle_request)
     get_request = format_get_request(params)
     url = SCRAPE_VARS['DOMAIN'] + SCRAPE_VARS['PATH'] + get_request
-    # assert url == "http://info.kingcounty.gov/health/ehs/foodsafety/inspections/Results.aspx?Inspection_Start=3/1/2016&Violation_Red_Points=&Fuzzy_Search=N&Violation_Points=&City=Seattle&Sort=H&Business_Name=&Business_Address=&Latitude=&Output=W&Inspection_Closed_Business=A&Inspection_End=3/22/2016&Inspection_Type=All&Violation_Descr=&Zip_Code=&Longitude="
-
     response = send_request(url)
     assert response.status_code == 200
+
+
+def test_parse_broken_html(seattle_request):
+    params = update_vals(**seattle_request)
+    get_request = format_get_request(params)
+    url = SCRAPE_VARS['DOMAIN'] + SCRAPE_VARS['PATH'] + get_request
+    response = send_request(url)
+    # parsed = parse_broken_html(response.text)
+    # import pdb; pdb.set_trace()
+    assert get_inspection_page(params) == response.text, response.encoding
