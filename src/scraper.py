@@ -58,11 +58,9 @@ def send_request(endpoint):
 def parse_broken_html(raw_text):
     return html5lib.parse(raw_text)
 
+
 def get_inspection_page(**kwargs):
-    """Create a get request to the API endpoint.
-
-
-    """
+    """Create a get request to the API endpoint."""
     endpoint = SCRAPE_VARS['DOMAIN'] + SCRAPE_VARS['PATH']
     params = update_vals(**kwargs)
     response = send_request(endpoint, params)
