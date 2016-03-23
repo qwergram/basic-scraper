@@ -3,6 +3,7 @@
 import requests
 import io
 from bs4 import BeautifulSoup
+import sys
 
 SCRAPE_VARS = {
     "DOMAIN": 'http://info.kingcounty.gov/',
@@ -79,11 +80,25 @@ def get_inspection_page(**kwargs):
     return response.content, response.encoding
 
 
+def load_inspection_page():
+    """Load the cached inspection page."""
+    with io.open("inspection_page.html") as response:
+        response = response.read()
+    return response, "utf-8"
+
 if __name__ == "__main__":
     seattle = {
                "City": "Seattle",
                "Inspection_End": "3/22/2016",
                "Inspection_Start": "3/1/2016"
               }
-    content, encoding = get_inspection_page(**seattle)
+    try:
+        if sys.argv[1] == "get":
+            content, encoding = get_inspection_page(**seattle)
+        elif sys.argv[1] == "load":
+            content, encoding = load_inspection_page()
+        else:
+            raise IndexError
+    except IndexError:
+        raise ValueError("Please specify a 'load' or 'get' keyword")
     parse_broken_html(content, encoding)
