@@ -1,6 +1,7 @@
 # coding=utf-8
 """Scrape foodsafety data from kingcounty."""
 import requests
+import io
 from bs4 import BeautifulSoup
 
 SCRAPE_VARS = {
@@ -61,13 +62,20 @@ def parse_broken_html(raw_text, encoding="utf-8"):
     return parsed
 
 
+def save_html(html):
+    with io.open("inspection_page.html", 'w') as save:
+        save.write(html)
+
+
 def get_inspection_page(**kwargs):
     """Create a get request to the API endpoint."""
     endpoint = SCRAPE_VARS['DOMAIN'] + SCRAPE_VARS['PATH']
     params = update_vals(**kwargs)
     response = send_request(endpoint, params)
+    save_html(response.content)
     return response.content, response.encoding
 
 
 if __name__ == "__main__":
-    get_inspection_page()
+    content, encoding = get_inspection_page()
+    parse_broken_html(content, encoding)
