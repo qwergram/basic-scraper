@@ -1,6 +1,7 @@
 # coding=utf-8
 """Scrape foodsafety data from kingcounty."""
-import requests, html5lib
+import requests
+from bs4 import BeautifulSoup
 
 SCRAPE_VARS = {
     "DOMAIN": 'http://info.kingcounty.gov/',
@@ -55,8 +56,9 @@ def send_request(endpoint):
     return response
 
 
-def parse_broken_html(raw_text):
-    return html5lib.parse(raw_text)
+def parse_broken_html(raw_text, encoding="utf-8"):
+    parsed = BeautifulSoup(raw_text, 'html5lib', from_encoding=encoding)
+    return parsed
 
 
 def get_inspection_page(**kwargs):
