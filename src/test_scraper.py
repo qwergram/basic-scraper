@@ -17,7 +17,11 @@ def empty_request():
 @pytest.fixture(scope='function')
 def seattle_request():
     """Create a request for every seattle restraunt."""
-    return {"City": "Seattle", "Inspection_End": "3/22/2016", "Inspection_Start": "3/1/2016"}
+    return {
+            "City": "Seattle",
+            "Inspection_End": "3/22/2016",
+            "Inspection_Start": "3/1/2016"
+            }
 
 
 def test_update_null(empty_request):
@@ -65,8 +69,12 @@ def test_seattle_to_get(seattle_request):
     assert get_req.startswith('?')
     assert not get_req.endswith('&')
 
+
 def test_send_request_dummy(seattle_request):
     params = update_vals(**seattle_request)
-    # response = send_request(SCRAPE_VARS['DOMAIN'] + SCRAPE_VARS['PATH'], params)
-    # import pdb; pdb.set_trace()
-    assert 1 == 1
+    get_request = format_get_request(params)
+    url = SCRAPE_VARS['DOMAIN'] + SCRAPE_VARS['PATH'] + get_request
+    # assert url == "http://info.kingcounty.gov/health/ehs/foodsafety/inspections/Results.aspx?Inspection_Start=3/1/2016&Violation_Red_Points=&Fuzzy_Search=N&Violation_Points=&City=Seattle&Sort=H&Business_Name=&Business_Address=&Latitude=&Output=W&Inspection_Closed_Business=A&Inspection_End=3/22/2016&Inspection_Type=All&Violation_Descr=&Zip_Code=&Longitude="
+
+    response = send_request(url)
+    assert response.status_code == 200
