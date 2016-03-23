@@ -90,8 +90,9 @@ def test_get_inspection_page(seattle_request):
 
 
 def test_save_html(seattle_request):
-    import io
+    import io, os
     save_html("test")
     with io.open("inspection_page.html") as test:
         test = test.read()
     assert test == "test"
+    os.system("inspection_page.html")
