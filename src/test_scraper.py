@@ -79,7 +79,7 @@ def test_send_request_dummy(seattle_request):
     assert response.status_code == 200
 
 
-def test_parse_broken_html(seattle_request):
+def test_get_inspection_page(seattle_request):
     params = update_vals(**seattle_request)
     get_request = format_get_request(params)
     url = SCRAPE_VARS['DOMAIN'] + SCRAPE_VARS['PATH'] + get_request

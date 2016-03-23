@@ -2,6 +2,7 @@ from setuptools import setup
 
 requires = [
     'requests',
+    'html5lib',
     ]
 
 test_requires = [
