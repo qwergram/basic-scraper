@@ -59,7 +59,93 @@ def send_request(endpoint):
 
 
 def parse_broken_html(raw_text, encoding="utf-8"):
+
+    def has_two_tds(elem):
+        if elem.name == 'tr':
+            td_children = elem.find_all('td', recursive=False)
+            return len(td_children) == 2
+        return False
+
+    def custom_filter(focus):
+        isfull = this.get('name') and this.get('address')
+        if not isfull:
+            return False
+        isnot_inspection = not this['name'].lower().startswith('inspection')
+        isnot_business = not this['name'].lower().startswith('- business')
+        isnot_description = not this['name'].lower().startswith('Inspection '
+                                                                'violations '
+                                                                'and points')
+        return isnot_inspection and isnot_business and isnot_description
+
     parsed = BeautifulSoup(raw_text, 'html5lib', from_encoding=encoding)
+    restruants = []
+    results = {}
+    for restruant in parsed.find_all('table')[2:]:
+        restruants.append(restruant)
+
+    for i, r in enumerate(restruants):
+        this = {}
+        if i % 4 == 0:
+            this['name'] = (r.find("td").text.strip().replace("+ ", "", 1))
+            this['address'] = (r.find_all("td")[-1].text.strip())
+
+            if custom_filter(this):
+                results[this['name']] = this
+
+        elif (i - 1) % 4 == 0:
+            keys = [
+                ("category", "", 3),
+                ("phone", "", 9),
+                ("latitude", "", 11),
+                ("longitude", "", 13),
+                ("name", "- business name", 1),
+                ("address", "address:", 5),
+            ]
+            for string, check, index in keys:
+                try:
+                    if check not in r.find_all('td')[index - 1].string.lower():
+                        raise AttributeError("Check failed")
+                    this[string] = r.find_all('td')[index].string.strip()
+                except (IndexError, AttributeError):
+                    pass
+
+                inspection_details = {}
+                keys = [
+                    ("inspection type", 0, 4),
+                    ("date", 1, 5),
+                    ("score", 2, 6),
+                    ("result", 3, 7),
+                ]
+                for check, check_index, actual_index in keys:
+                    try:
+                        value = r.table.find_all("td")[actual_index].string.strip()
+                        inspection_details[check.replace(" ", "_")] = value
+                    except (AttributeError, TypeError, IndexError):
+                        pass
+
+                if inspection_details:
+                    this['inspection'] = inspection_details
+
+
+                grades = []
+                try:
+                    for grade in r.find_all("table")[1].find_all("td")[1:]:
+                        if grade.string:
+                            grades.append(grade.string.strip())
+                    if grades:
+                        this['grades'] = grades
+                except IndexError:
+                    pass
+
+            if custom_filter(this):
+                results[this['name']].update(this)
+
+
+
+
+
+    import pdb; pdb.set_trace()
+
     return parsed
 
 
@@ -77,7 +163,7 @@ def get_inspection_page(**kwargs):
     get = format_get_request(params)
     response = send_request(endpoint + get)
     save_html(response.content)
-    return response.content.decode(response.encoding), response.encoding
+    return response.content.decode('utf-8'), response.encoding
 
 
 def load_inspection_page():
@@ -102,4 +188,4 @@ if __name__ == "__main__":
             raise IndexError
     except IndexError:
         raise ValueError("Please specify a 'load' or 'get' keyword")
-    parse_broken_html(content, encoding)
+    parse_broken_html(content.encode('utf-8'), encoding)
