@@ -2,6 +2,7 @@ from scraper import (
     update_vals,
     SCRAPE_VARS,
     get_inspection_page,
+    load_inspection_page,
     format_get_request,
     send_request,
     parse_broken_html,
@@ -86,13 +87,4 @@ def test_get_inspection_page(seattle_request):
     url = SCRAPE_VARS['DOMAIN'] + SCRAPE_VARS['PATH'] + get_request
     response = send_request(url)
     test_text, test_encoding = get_inspection_page(**seattle_request)
-    assert test_text[:200].decode('utf-8') == response.text[:200], response.encoding  # NOQA
-
-
-def test_save_html(seattle_request):
-    import io, os
-    save_html("test")
-    with io.open("inspection_page.html") as test:
-        test = test.read()
-    assert test == "test"
-    os.system("inspection_page.html")
+    assert test_text[:200] == response.text[:200], response.encoding  # NOQA
