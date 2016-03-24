@@ -77,13 +77,14 @@ def get_meta_data(divs):
         rows = div.find('tbody').find_all(
             has_two_tds, recursive=False
         )
-        meta_data.append(rows)
+        inspection_data = div.find_all(is_inspection_row)
+        meta_data.append([rows, inspection_data])
     return meta_data
 
 
 def extract_useful_data(meta_data):
     parsed_meta_data = {}
-    for data_set in meta_data:
+    for data_set, inspection_data in meta_data:
         try:
             name = data_set[0].find_all('td')[1].string.strip()
             parsed_meta_data[name] = {"name": name}
