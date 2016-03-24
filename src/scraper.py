@@ -4,6 +4,7 @@ import requests
 import io
 from bs4 import BeautifulSoup
 import sys
+import re
 
 SCRAPE_VARS = {
     "DOMAIN": 'http://info.kingcounty.gov/',
@@ -58,7 +59,17 @@ def send_request(endpoint):
     return response
 
 
+def get_divs(raw_text):
+    id_finder = re.compile(r"PR[\d]+~")
+    return raw_text.find_all('div', id=id_finder)
+
+
 def parse_broken_html(raw_text, encoding="utf-8"):
+    divs = get_divs(raw_text)
+    return divs
+
+
+def parse_broken_html_bad(raw_text, encoding="utf-8"):
 
     def has_two_tds(elem):
         if elem.name == 'tr':
