@@ -64,10 +64,26 @@ def get_divs(soup):
     return soup.find_all('div', id=id_finder)
 
 
+def has_two_tds(elem):
+    if elem.name == 'tr':
+        td_children = elem.find_all('td', recursive=False)
+        return len(td_children) == 2
+    return False
+
+
+def get_meta_data(divs):
+    meta_data = []
+    for div in divs:
+        rows = div.find('tbody').find_all(
+            has_two_tds, recursive=False
+        )
+        meta_data.append(rows)
+    return meta_data
+
 def parse_broken_html(raw_text, encoding="utf-8"):
     soup = BeautifulSoup(raw_text, 'html5lib', from_encoding=encoding)
     divs = get_divs(soup)
-    import pdb; pdb.set_traceback()
+    import pdb; pdb.set_trace()
     return divs
 
 
