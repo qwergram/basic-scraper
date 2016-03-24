@@ -84,21 +84,20 @@ def get_meta_data(divs):
 def extract_useful_data(meta_data):
     parsed_meta_data = {}
     for data_set in meta_data:
-        name = data_set[0].find_all('td')[1].string.strip()
-        category = data_set[1].find_all('td')[1].string.strip()
-        address1 = data_set[2].find_all('td')[1].string.strip()
-        address2 = data_set[3].find_all('td')[1].string.strip()
-        phone = data_set[4].find_all('td')[1].string.strip()
-        latitude = data_set[5].find_all('td')[1].string.strip()
-        longitude = data_set[6].find_all('td')[1].string.strip()
-        parsed_meta_data[name] = {
-            "name": name,
-            "category": category,
-            "address": " ".join([address1, address2]),
-            "phone": phone,
-            "latitude": latitude,
-            "longitude": longitude,
-        }
+        try:
+            name = data_set[0].find_all('td')[1].string.strip()
+            parsed_meta_data[name] = {"name": name}
+        except (AttributeError, TypeError):
+            continue
+        for i, column in enumerate("name category address1"
+                                   " address2 phone latitude "
+                                   "longitude".split()):
+            try:
+                target = data_set[i].find_all('td')[1].string.strip()
+                parsed_meta_data[name][column] = target
+            except AttributeError:
+                pass
+
     return parsed_meta_data
 
 
