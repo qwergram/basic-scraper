@@ -117,7 +117,7 @@ def is_inspection_row(elem):
 
 
 def extract_inspection_data(inspection_data):
-    inspection_history = []
+    result = {'history': []}
     for inspection in inspection_data[1:]:
         parsed = {}
         focus = inspection.find_all('td')
@@ -125,9 +125,24 @@ def extract_inspection_data(inspection_data):
         parsed['date'] = focus[1].string.strip()
         parsed['score'] = focus[2].string.strip()
         parsed['result'] = focus[3].string.strip()
-        inspection_history.append(parsed)
-    return inspection_history
+        result['history'].append(parsed)
+    high_score, average_score, inspections = get_mean_high_sum(result['history'])
+    result['high'] = high_score
+    result['avg'] = average
+    result['inpsection_count'] = inspection
+    return result
 
+
+def get_mean_high_sum(parsed_inspection_data):
+    high_score = 0
+    score_history = []
+    for inspection in parsed_inspection_data:
+        score = inspection['score']
+        score_history.append(score)
+        if score > high_score:
+            high_score = score
+    average = sum(score_history) / len(score_history)
+    return high_score, average, len(score_history)
 
 def parse_broken_html(raw_text, encoding="utf-8"):
     soup = BeautifulSoup(raw_text, 'html5lib', from_encoding=encoding)
