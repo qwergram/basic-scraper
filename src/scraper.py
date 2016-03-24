@@ -77,7 +77,7 @@ def get_inspection_page(**kwargs):
     get = format_get_request(params)
     response = send_request(endpoint + get)
     save_html(response.content)
-    return response.content, response.encoding
+    return response.content.decode(response.encoding), response.encoding
 
 
 def load_inspection_page():
@@ -85,6 +85,7 @@ def load_inspection_page():
     with io.open("inspection_page.html") as response:
         response = response.read()
     return response, "utf-8"
+
 
 if __name__ == "__main__":
     seattle = {
