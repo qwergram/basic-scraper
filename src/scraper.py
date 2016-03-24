@@ -59,13 +59,15 @@ def send_request(endpoint):
     return response
 
 
-def get_divs(raw_text):
+def get_divs(soup):
     id_finder = re.compile(r"PR[\d]+~")
-    return raw_text.find_all('div', id=id_finder)
+    return soup.find_all('div', id=id_finder)
 
 
 def parse_broken_html(raw_text, encoding="utf-8"):
-    divs = get_divs(raw_text)
+    soup = BeautifulSoup(raw_text, 'html5lib', from_encoding=encoding)
+    divs = get_divs(soup)
+    import pdb; pdb.set_traceback()
     return divs
 
 
