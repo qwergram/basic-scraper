@@ -90,6 +90,7 @@ def extract_useful_data(meta_data):
             parsed_meta_data[name] = {"name": name}
         except (AttributeError, TypeError):
             continue
+        inspection_parsed = extract_inspection_data(inspection_data)
         for i, column in enumerate("name category address1"
                                    " address2 phone latitude "
                                    "longitude".split()):
@@ -115,8 +116,17 @@ def is_inspection_row(elem):
         return False
 
 
-def extract_inspection_data(elem):
-    return elem.find_all(is_inspection_row)
+def extract_inspection_data(inspection_data):
+    inspection_history = []
+    for inspection in inspection_data[1:]:
+        parsed = {}
+        focus = inspection.find_all('td')
+        parsed['type'] = inspection.find_all('td')[0].string.strip()
+        parsed['date'] = inspection.find_all('td')[1].string.strip()
+        parsed['score'] = inspection.find_all('td')[2].string.strip()
+        parsed['result'] = inspection.find_all('td')[3].string.strip()
+        inspection_history.append(parsed)
+    return inspection_history
 
 
 def parse_broken_html(raw_text, encoding="utf-8"):
@@ -124,7 +134,6 @@ def parse_broken_html(raw_text, encoding="utf-8"):
     divs = get_divs(soup)
     meta_data = get_meta_data(divs)
     py_dict = extract_useful_data(meta_data)
-    import pdb; pdb.set_trace()
     return divs
 
 
@@ -209,12 +218,6 @@ def parse_broken_html_bad(raw_text, encoding="utf-8"):
 
             if custom_filter(this):
                 results[this['name']].update(this)
-
-
-
-
-
-    import pdb; pdb.set_trace()
 
     return parsed
 
