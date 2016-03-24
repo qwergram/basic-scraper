@@ -80,9 +80,33 @@ def get_meta_data(divs):
         meta_data.append(rows)
     return meta_data
 
+
+def extract_useful_data(meta_data):
+    parsed_meta_data = {}
+    for data_set in meta_data:
+        name = data_set[0].find_all('td')[1].string.strip()
+        category = data_set[1].find_all('td')[1].string.strip()
+        address1 = data_set[2].find_all('td')[1].string.strip()
+        address2 = data_set[3].find_all('td')[1].string.strip()
+        phone = data_set[4].find_all('td')[1].string.strip()
+        latitude = data_set[5].find_all('td')[1].string.strip()
+        longitude = data_set[6].find_all('td')[1].string.strip()
+        parsed_meta_data[name] = {
+            "name": name,
+            "category": category,
+            "address": " ".join([address1, address2]),
+            "phone": phone,
+            "latitude": latitude,
+            "longitude": longitude,
+        }
+    return parsed_meta_data
+
+
 def parse_broken_html(raw_text, encoding="utf-8"):
     soup = BeautifulSoup(raw_text, 'html5lib', from_encoding=encoding)
     divs = get_divs(soup)
+    meta_data = get_meta_data(divs)
+    py_dict = extract_useful_data(meta_data)
     import pdb; pdb.set_trace()
     return divs
 
