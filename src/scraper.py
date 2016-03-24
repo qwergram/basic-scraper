@@ -5,6 +5,7 @@ import io
 from bs4 import BeautifulSoup
 import sys
 import re
+import json
 
 SCRAPE_VARS = {
     "DOMAIN": 'http://info.kingcounty.gov/',
@@ -151,8 +152,7 @@ def parse_broken_html(raw_text, encoding="utf-8"):
     divs = get_divs(soup)
     meta_data = get_meta_data(divs)
     py_dict = extract_useful_data(meta_data)
-    import pdb; pdb.set_trace()
-    return divs
+    return py_dict
 
 
 def save_html(html):
@@ -179,6 +179,12 @@ def load_inspection_page():
     return response, "utf-8"
 
 
+def save_json(py_dict):
+    data = json.dumps(py_dict, indent=2)
+    with io.open("result.json", 'w') as f:
+        f.write(data)
+
+
 if __name__ == "__main__":
     seattle = {
                "City": "Seattle",
@@ -186,12 +192,18 @@ if __name__ == "__main__":
                "Inspection_Start": "3/1/2016"
               }
     try:
+        if len(sys.argv) > 2:
+            params = json.loads(sys.argv[2])
+        else:
+            params = seattle
         if sys.argv[1] == "get":
-            content, encoding = get_inspection_page(**seattle)
+            content, encoding = get_inspection_page(**params)
         elif sys.argv[1] == "load":
             content, encoding = load_inspection_page()
         else:
             raise IndexError
     except IndexError:
         raise ValueError("Please specify a 'load' or 'get' keyword")
-    parse_broken_html(content.encode('utf-8'), encoding)
+    parsed = parse_broken_html(content.encode('utf-8'), encoding)
+    save_json(parsed)
+    print(parsed)
