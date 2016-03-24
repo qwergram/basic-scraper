@@ -90,7 +90,7 @@ def extract_useful_data(meta_data):
             parsed_meta_data[name] = {"name": name}
         except (AttributeError, TypeError):
             continue
-        parsed_meta_data['inspection'] = extract_inspection_data(inspection_data)
+        parsed_meta_data[name]['inspection'] = extract_inspection_data(inspection_data)
         for i, column in enumerate("name category address1"
                                    " address2 phone latitude "
                                    "longitude".split()):
@@ -128,16 +128,18 @@ def extract_inspection_data(inspection_data):
         result['history'].append(parsed)
     high_score, average_score, inspections = get_mean_high_sum(result['history'])
     result['high'] = high_score
-    result['avg'] = average
-    result['inpsection_count'] = inspection
+    result['avg'] = average_score
+    result['inpsection_count'] = inspections
     return result
 
 
 def get_mean_high_sum(parsed_inspection_data):
     high_score = 0
     score_history = []
+    if not len(parsed_inspection_data):
+        return 0, 0, 0
     for inspection in parsed_inspection_data:
-        score = inspection['score']
+        score = int(inspection['score'])
         score_history.append(score)
         if score > high_score:
             high_score = score
