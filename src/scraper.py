@@ -101,6 +101,23 @@ def extract_useful_data(meta_data):
     return parsed_meta_data
 
 
+def is_inspection_row(elem):
+    if elem.name == 'tr':
+        td_children = elem.find_all('td', recursive=False)
+        has_four = len(td_children) == 4
+        if td_children[0].string:
+            contains_word = 'inspection' in td_children[0].string.lower()
+            return has_four and contains_word
+        else:
+            return False
+    else:
+        return False
+
+
+def extract_inspection_data(elem):
+    return elem.find_all(is_inspection_row)
+
+
 def parse_broken_html(raw_text, encoding="utf-8"):
     soup = BeautifulSoup(raw_text, 'html5lib', from_encoding=encoding)
     divs = get_divs(soup)
