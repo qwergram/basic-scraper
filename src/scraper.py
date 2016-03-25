@@ -107,13 +107,10 @@ def extract_useful_data(meta_data):
                 parsed_meta_data[name][column] = target
             except AttributeError:
                 pass
-
         parsed_meta_data[name]['geo'] = get_more_geo_data(parsed_meta_data[name])
-
         try:
             latitude = parsed_meta_data[name]['geo']['lat']
             longitude = parsed_meta_data[name]['geo']['lng']
-
             geo_json["features"].append({
                 "type": "Feature",
                 "properties": {},
@@ -133,9 +130,7 @@ def extract_useful_data(meta_data):
                 del parsed_meta_data[name][to_delete]
             except KeyError:
                 continue
-
     return parsed_meta_data, geo_json
-
 
 
 def is_inspection_row(elem):
@@ -187,8 +182,6 @@ def parse_broken_html(raw_text, encoding="utf-8"):
     divs = get_divs(soup)
     meta_data = get_meta_data(divs)
     py_dict, geo_json = extract_useful_data(meta_data)
-    import pdb; pdb.set_trace()
-
     return py_dict
 
 
@@ -232,7 +225,6 @@ def load_inspection_page():
 
 
 def save_json(py_dict):
-    geojson = {"type": "FeatureCollection", "features": []}
     data = json.dumps(py_dict, indent=2)
     with io.open("result.json", 'w') as f:
         f.write(data)
