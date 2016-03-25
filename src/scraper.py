@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 import sys
 import re
 import json
+import geocoder
 
 SCRAPE_VARS = {
     "DOMAIN": 'http://info.kingcounty.gov/',
@@ -100,8 +101,14 @@ def extract_useful_data(meta_data):
                 parsed_meta_data[name][column] = target
             except AttributeError:
                 pass
+        parsed_meta_data[name]['geo'] = get_more_geo_data(parsed_meta_data[name])
+        del parsed_meta_data[name]['address1']
+        del parsed_meta_data[name]['address2']
+        del parsed_meta_data[name]['latitude']
+        del parsed_meta_data[name]['longitude']
 
     return parsed_meta_data
+
 
 
 def is_inspection_row(elem):
@@ -152,7 +159,23 @@ def parse_broken_html(raw_text, encoding="utf-8"):
     divs = get_divs(soup)
     meta_data = get_meta_data(divs)
     py_dict = extract_useful_data(meta_data)
+
     return py_dict
+
+def get_more_geo_data(data_set):
+    address = ""
+    address1 = data_set.get('address1')
+    address2 = data_set.get('address2')
+    if address1:
+        address += address1.strip()
+    if address2:
+        address += ' ' + address2.strip()
+    more = geocoder.google(address).json
+    if more.ok:
+        return more
+    else:
+        return {"address": address}
+    import pdb; pdb.set_trace()
 
 
 def save_html(html):
