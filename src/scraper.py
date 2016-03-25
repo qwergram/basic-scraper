@@ -2,6 +2,7 @@
 """Scrape foodsafety data from kingcounty."""
 import requests
 import io
+import os
 from bs4 import BeautifulSoup
 import sys
 import re
@@ -87,6 +88,10 @@ def get_meta_data(divs):
 
 def extract_useful_data(meta_data):
     parsed_meta_data = {}
+    geo_json = {
+        "type": "FeatureCollection",
+        "features": []
+    }
     for data_set, inspection_data in meta_data:
         try:
             name = data_set[0].find_all('td')[1].string.strip()
@@ -102,13 +107,34 @@ def extract_useful_data(meta_data):
                 parsed_meta_data[name][column] = target
             except AttributeError:
                 pass
-        parsed_meta_data[name]['geo'] = get_more_geo_data(parsed_meta_data[name])
-        del parsed_meta_data[name]['address1']
-        del parsed_meta_data[name]['address2']
-        del parsed_meta_data[name]['latitude']
-        del parsed_meta_data[name]['longitude']
 
-    return parsed_meta_data
+        parsed_meta_data[name]['geo'] = get_more_geo_data(parsed_meta_data[name])
+
+        try:
+            latitude = parsed_meta_data[name]['geo']['lat']
+            longitude = parsed_meta_data[name]['geo']['lng']
+
+            geo_json["features"].append({
+                "type": "Feature",
+                "properties": {},
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [
+                        latitude,
+                        longitude
+                    ]
+                }
+            })
+        except KeyError:
+            pass
+
+        for to_delete in "address1 address2 latitude longitude".split():
+            try:
+                del parsed_meta_data[name][to_delete]
+            except KeyError:
+                continue
+
+    return parsed_meta_data, geo_json
 
 
 
@@ -160,7 +186,8 @@ def parse_broken_html(raw_text, encoding="utf-8"):
     soup = BeautifulSoup(raw_text, 'html5lib', from_encoding=encoding)
     divs = get_divs(soup)
     meta_data = get_meta_data(divs)
-    py_dict = extract_useful_data(meta_data)
+    py_dict, geo_json = extract_useful_data(meta_data)
+    import pdb; pdb.set_trace()
 
     return py_dict
 
@@ -205,6 +232,7 @@ def load_inspection_page():
 
 
 def save_json(py_dict):
+    geojson = {"type": "FeatureCollection", "features": []}
     data = json.dumps(py_dict, indent=2)
     with io.open("result.json", 'w') as f:
         f.write(data)
@@ -222,15 +250,25 @@ if __name__ == "__main__":
         else:
             params = seattle
         if sys.argv[1] == "get":
+            print("Getting and parsing king county data...")
             content, encoding = get_inspection_page(**params)
+            print("Contacting Google for more data...")
+            current_result = parse_broken_html(content.encode('utf-8'), encoding)
+            print("Saving...")
+            save_json(current_result)
         elif sys.argv[1] == "load":
-            content, encoding = load_inspection_page()
-            parsed = parse_broken_html(content.encode('utf-8'), encoding)
+            if os.path.exists('result.json'):
+                with io.open('result.json') as r:
+                    parsed = json.loads(r.read())
+            else:
+                content, encoding = load_inspection_page()
+                parsed = parse_broken_html(content.encode('utf-8'), encoding)
             save_json(parsed)
         elif sys.argv[1] == 'test':
             content, encoding = load_inspection_page()
-            parsed = parse_broken_html(content.encode('utf-8'), encoding)
-            pprint(parsed)
+            current_result = parse_broken_html(content.encode('utf-8'), encoding)
+            save_json(current_result)
+            pprint(current_result)
         else:
             raise IndexError
     except IndexError:
