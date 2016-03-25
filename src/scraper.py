@@ -2,10 +2,13 @@
 """Scrape foodsafety data from kingcounty."""
 import requests
 import io
+import os
 from bs4 import BeautifulSoup
 import sys
 import re
 import json
+import geocoder
+import pprint
 
 SCRAPE_VARS = {
     "DOMAIN": 'http://info.kingcounty.gov/',
@@ -85,6 +88,10 @@ def get_meta_data(divs):
 
 def extract_useful_data(meta_data):
     parsed_meta_data = {}
+    geo_json = {
+        "type": "FeatureCollection",
+        "features": []
+    }
     for data_set, inspection_data in meta_data:
         try:
             name = data_set[0].find_all('td')[1].string.strip()
@@ -100,8 +107,30 @@ def extract_useful_data(meta_data):
                 parsed_meta_data[name][column] = target
             except AttributeError:
                 pass
+        parsed_meta_data[name]['geo'] = get_more_geo_data(parsed_meta_data[name])
+        try:
+            latitude = parsed_meta_data[name]['geo']['lat']
+            longitude = parsed_meta_data[name]['geo']['lng']
+            geo_json["features"].append({
+                "type": "Feature",
+                "properties": {},
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [
+                        latitude,
+                        longitude
+                    ]
+                }
+            })
+        except KeyError:
+            pass
 
-    return parsed_meta_data
+        for to_delete in "address1 address2 latitude longitude".split():
+            try:
+                del parsed_meta_data[name][to_delete]
+            except KeyError:
+                continue
+    return parsed_meta_data, geo_json
 
 
 def is_inspection_row(elem):
@@ -147,12 +176,28 @@ def get_mean_high_sum(parsed_inspection_data):
     average = sum(score_history) / len(score_history)
     return high_score, average, len(score_history)
 
+
 def parse_broken_html(raw_text, encoding="utf-8"):
     soup = BeautifulSoup(raw_text, 'html5lib', from_encoding=encoding)
     divs = get_divs(soup)
     meta_data = get_meta_data(divs)
-    py_dict = extract_useful_data(meta_data)
+    py_dict, geo_json = extract_useful_data(meta_data)
     return py_dict
+
+
+def get_more_geo_data(data_set):
+    address = ""
+    address1 = data_set.get('address1')
+    address2 = data_set.get('address2')
+    if address1:
+        address += address1.strip()
+    if address2:
+        address += ' ' + address2.strip()
+    more = geocoder.google(address)
+    if more.ok:
+        return more.json
+    else:
+        return {"address": address}
 
 
 def save_html(html):
@@ -197,13 +242,26 @@ if __name__ == "__main__":
         else:
             params = seattle
         if sys.argv[1] == "get":
+            print("Getting and parsing king county data...")
             content, encoding = get_inspection_page(**params)
+            print("Contacting Google for more data...")
+            current_result = parse_broken_html(content.encode('utf-8'), encoding)
+            print("Saving...")
+            save_json(current_result)
         elif sys.argv[1] == "load":
+            if os.path.exists('result.json'):
+                with io.open('result.json') as r:
+                    parsed = json.loads(r.read())
+            else:
+                content, encoding = load_inspection_page()
+                parsed = parse_broken_html(content.encode('utf-8'), encoding)
+            save_json(parsed)
+        elif sys.argv[1] == 'test':
             content, encoding = load_inspection_page()
+            current_result = parse_broken_html(content.encode('utf-8'), encoding)
+            save_json(current_result)
+            pprint(current_result)
         else:
             raise IndexError
     except IndexError:
-        raise ValueError("Please specify a 'load' or 'get' keyword")
-    parsed = parse_broken_html(content.encode('utf-8'), encoding)
-    save_json(parsed)
-    print(parsed)
+        raise ValueError("Please specify a 'test', 'load' or 'get' keyword")
