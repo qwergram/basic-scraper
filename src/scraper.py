@@ -7,6 +7,7 @@ import sys
 import re
 import json
 import geocoder
+import pprint
 
 SCRAPE_VARS = {
     "DOMAIN": 'http://info.kingcounty.gov/',
@@ -224,10 +225,13 @@ if __name__ == "__main__":
             content, encoding = get_inspection_page(**params)
         elif sys.argv[1] == "load":
             content, encoding = load_inspection_page()
+            parsed = parse_broken_html(content.encode('utf-8'), encoding)
+            save_json(parsed)
+        elif sys.argv[1] == 'test':
+            content, encoding = load_inspection_page()
+            parsed = parse_broken_html(content.encode('utf-8'), encoding)
+            pprint(parsed)
         else:
             raise IndexError
     except IndexError:
         raise ValueError("Please specify a 'load' or 'get' keyword")
-    parsed = parse_broken_html(content.encode('utf-8'), encoding)
-    save_json(parsed)
-    print(parsed)
