@@ -173,9 +173,9 @@ def get_more_geo_data(data_set):
         address += address1.strip()
     if address2:
         address += ' ' + address2.strip()
-    more = geocoder.google(address).json
+    more = geocoder.google(address)
     if more.ok:
-        return more
+        return more.json
     else:
         return {"address": address}
 
@@ -234,4 +234,4 @@ if __name__ == "__main__":
         else:
             raise IndexError
     except IndexError:
-        raise ValueError("Please specify a 'load' or 'get' keyword")
+        raise ValueError("Please specify a 'test', 'load' or 'get' keyword")
