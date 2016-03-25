@@ -154,6 +154,7 @@ def get_mean_high_sum(parsed_inspection_data):
     average = sum(score_history) / len(score_history)
     return high_score, average, len(score_history)
 
+
 def parse_broken_html(raw_text, encoding="utf-8"):
     soup = BeautifulSoup(raw_text, 'html5lib', from_encoding=encoding)
     divs = get_divs(soup)
@@ -161,6 +162,7 @@ def parse_broken_html(raw_text, encoding="utf-8"):
     py_dict = extract_useful_data(meta_data)
 
     return py_dict
+
 
 def get_more_geo_data(data_set):
     address = ""
@@ -175,7 +177,6 @@ def get_more_geo_data(data_set):
         return more
     else:
         return {"address": address}
-    import pdb; pdb.set_trace()
 
 
 def save_html(html):
